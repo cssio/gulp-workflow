@@ -13,10 +13,14 @@ var gulp         = require('gulp'),
 	plumber 	 = require('gulp-plumber'),
 	include      = require("gulp-include"),
 
+	critical     = require('critical'),
+
 	sourcemaps = require('gulp-sourcemaps'),
 
 	pug          = require('gulp-pug'),
+	frontMatter  = require('gulp-front-matter'),
 	cached       = require('gulp-cached'),
+	changed = require('gulp-changed'),
 
 	sass 		 = require('gulp-sass'),
 	uncss        = require('gulp-uncss'),
@@ -26,6 +30,8 @@ var gulp         = require('gulp'),
 
 	
 	uglify 		 = require('gulp-uglify'),
+
+	streamify    = require('gulp-streamify'),
 	
 	
 	spritesmith  = require('gulp.spritesmith'),
@@ -65,7 +71,7 @@ var gulp         = require('gulp'),
 
 var src = {
 	pagelist: 'src/yaml/index.yaml',
-	html: 'src/pug/**/*.pug',
+	html: 'src/pug/**/[^_]*.pug',
 	fonts: 'src/fonts/*',
 	scss: 'src/scss/**/*.scss',
 	js: 'src/js/**/*.js',
@@ -187,6 +193,30 @@ gulp.task('spriteSvg', function () {
         .pipe(gulp.dest('dist/sprites/'));
 });
 
+
+// --------------------------------------------------------------------------
+// Critical
+// --------------------------------------------------------------------------
+
+gulp.task('critical', function () {
+
+	critical.generate({
+		base: './',
+		inline: false,
+		src: 'dist/critical.html',
+		css: 'dist/css/app.min.css',
+		dimensions: [{
+			width: 1920,
+			height: 2000
+		}],
+		dest: 'src/critical/critical.css',
+		minify: true,
+		extract: true,
+		ignore: ['@font-face']
+	});
+
+});
+
 // --------------------------------------------------------------------------
 // Html or Pug
 // --------------------------------------------------------------------------
@@ -198,10 +228,14 @@ gulp.task('html', function() {
 		.pipe(plumber({
 			errorHandler: notify.onError("Error: <%= error.message %>")
 		}))
-		.pipe(cached('pug'))
+		
+		
+		.pipe(frontMatter({ property: 'data' }))
+		// .pipe(changed('dist', {extension: '.html'}))
 		.pipe(pug({
-			pretty: true
+			pretty: false
 		}))
+		.pipe(cached('pug'))
 		.pipe(gulp.dest(dist.html))
 		.pipe(browserSync.reload({ stream: true }))
 
@@ -298,7 +332,9 @@ gulp.task('js:plugins', function() {
     .pipe(plumber({
 			errorHandler: notify.onError("Error: <%= error.message %>")
 	}))
+	
     .pipe(concat('plugins.min.js'))
+    .pipe(uglify())
     .pipe(gulp.dest(dist.js))
 	.pipe(browserSync.reload({ stream: true }))
 });
@@ -320,14 +356,20 @@ gulp.task('js:app', function() {
 	    entries: 'src/js/app.js',
 	    debug: true
 	})
+
     .transform(babelify.configure({
       sourceMapRelative: dist.js // tells babelify to use this instead of an absolute path in the source map (so you can debug the individual source files)
     }))
+
 	.bundle()
+
+
 	.pipe(plumber({
 		errorHandler: notify.onError("Error: <%= error.message %>")
 	}))
+
     .pipe(source('app.min.js'))
+    .pipe(streamify(uglify()))
     .pipe(gulp.dest(dist.js))
     .pipe(browserSync.reload({ stream: true }))
 });
@@ -405,6 +447,12 @@ gulp.task('watch', function() {
 
 	gulp.watch(src.pagelist, ['pages']);
 	gulp.watch(src.html, ['html']);
+
+
+
+	gulp.watch(['src/pug/**/_*.pug', 'src/pug//**/[^_]*.pug'], ['html']);
+  	// gulp.watch(['src/pug//**/[^_]*.pug'], ['html']);
+
 	gulp.watch(src.fonts, ['fonts']);
 	gulp.watch(src.images, ['images']);
 	gulp.watch(src.scss, ['scss']);

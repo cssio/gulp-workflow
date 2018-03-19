@@ -1,7 +1,9 @@
-ProjectTitle: Gulp Tmpl ggf
+ProjectTitle: Gulp Tmpl
 
 PageList:
 - file: homepage.html
   ready: 100
 - file: styleguide.html
+  ready: 100
+- file: critical.html
   ready: 0

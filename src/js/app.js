@@ -6,7 +6,47 @@
 $(() => {
 
 
+	function initMap() {
 
+                    if ($('#map').length) {
+
+                        var map = new google.maps.Map(document.getElementById('map'), {
+                            center: { lat: 54.3181598, lng: 48.3837915 },
+                            zoom: 4,
+                            disableDefaultUI: true,
+                            styles: [{
+                                "featureType":"administrative","elementType":"labels.text.fill","stylers":[{"color":"#636363"}]},
+                                {"featureType":"landscape","elementType":"all","stylers":[{"color":"#fffcf2"}]},
+                                {"featureType":"water","elementType":"all","stylers":[{"color":"#aad3e6"},{"visibility":"on"}]}]
+                        });
+
+                        // Москва
+                        var marker1 = new google.maps.Marker({
+                            position: new google.maps.LatLng(55.797139, 37.6093601),
+                            map: map,
+                            icon: {
+                                url: "images/bg-img.png",
+                                scaledSize: new google.maps.Size(44, 60)
+                            }
+                        });
+
+                        // Санкт-Петербург
+                        var marker2 = new google.maps.Marker({
+                            position: new google.maps.LatLng(59.854462, 30.4811287),
+                            map: map,
+                            icon: {
+                                url: "images/bg-img.png",
+                                scaledSize: new google.maps.Size(44, 60)
+                            }
+                        });
+
+
+                    }
+
+                }
+
+                initMap();
+                
 	svg4everybody();
 
 	$('html').addClass('is-load');

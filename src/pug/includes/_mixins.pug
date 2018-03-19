@@ -1,0 +1,9 @@
+//- --------------------------------------------------------------------------
+//- Mixins
+//- --------------------------------------------------------------------------
+mixin sprite(svg_id)
+	svg(class=svg_id)
+		use(xlink:href= 'sprites/sprite.svg#' + svg_id)
+
+mixin img(img_src)
+	img(src=img_src alt="Alt").js-lazy
